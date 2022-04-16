@@ -71,6 +71,7 @@ class DynamoDbMessageRepository implements MessageRepository
     {
         $query = [
             'TableName' => $this->tableName,
+            "ScanIndexForward" =>  true,
             'KeyConditionExpression' => 'eventStream = :v1',
             'ExpressionAttributeValues' => [
                 ':v1' => ['S' => $id->toString()],
@@ -89,7 +90,19 @@ class DynamoDbMessageRepository implements MessageRepository
      */
     public function retrieveAllAfterVersion(AggregateRootId $id, int $aggregateRootVersion): Generator
     {
-        // TODO: Implement retrieveAllAfterVersion() method.
+        $query = [
+            'TableName' => $this->tableName,
+            "ScanIndexForward" =>  true,
+            'KeyConditionExpression' => 'eventStream = :v1 And version > :version',
+            'ExpressionAttributeValues' => [
+                ':v1' => ['S' => $id->toString()],
+                ':version' => ['N' => $aggregateRootVersion],
+            ]
+        ];
+
+        $result = $this->getClient()->getPaginator('Query', $query);
+
+        return $this->yieldMessagesForResult($result);
     }
 
     public function setTable(string $tableName)
