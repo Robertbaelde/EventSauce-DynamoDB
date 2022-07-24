@@ -96,7 +96,7 @@ class DynamoDbMessageRepository implements MessageRepository
             'KeyConditionExpression' => 'eventStream = :v1 And version > :version',
             'ExpressionAttributeValues' => [
                 ':v1' => ['S' => $id->toString()],
-                ':version' => ['N' => $aggregateRootVersion],
+                ':version' => ['N' => (string) $aggregateRootVersion],
             ]
         ];
 
